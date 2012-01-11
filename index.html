@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Tuomas Tanner - web application programmer and javascript enthusiast</title>
 <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 <link href="styles.css" rel="stylesheet" type="text/css">
@@ -314,7 +314,7 @@ function endgame() {
 	var twlink = "http://twitter.com/home?status=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+at+http%3A%2F%2Ftuomastanner.github.com+and+got+" + fishscore + "+tasty+fishes!+Try+and+beat+that!"
 	getEl("twlink").href = twlink;
 	$("#gameoverbox").css({"top":(winheight/4)+"px","left":(winwidth/2-150)+"px","display":"block","opacity": "0.8"});
-	//alert("Game Over! You caught " + fishscore + " fishes.");
+    _gaq.push(['_trackEvent', 'Game action', 'Game end', fishscore]);
 }
 function showsite() {
 	aniMt.remTimer("gamesecs");
@@ -353,6 +353,7 @@ function showgal() {
     animpaused = true;
     $("#gallery").css("display","block").animate({"opacity": "1"},2000);
     $("#backdrop").css("display", "block").animate({"opacity": "0.8"},2000);
+    _gaq.push(['_trackEvent', 'Photo Gallery', 'Show', 'do']);
 	loadphoto();
 }
 function changephoto() {
@@ -360,12 +361,14 @@ function changephoto() {
 	loadphoto()
 }
 function loadphoto() {
+    _gaq.push(['_trackEvent', 'Photo Gallery', 'Load photo', galphotos[galidx]]);
 	curphoto = $('<div class="galphoto"><img src="gallery/'+ galphotos[galidx] + '"></div>');
     curphoto.children().click(function(e){e.stopPropagation()}).load(function() {scalephoto($(this))});
 	$("#gallery").append(curphoto);
 	curphoto.animate({"opacity": "1"},2000);
 }
 function hidegal() {
+    _gaq.push(['_trackEvent', 'Photo Gallery', 'Hide', 'do']);
 	curphoto.animate({"opacity": "0"},2000);
     $("#gallery, #backdrop").animate({"opacity": "0"},2000, function(){$(this).css("display","none")});
     animpaused = false;
@@ -374,11 +377,13 @@ function hidegal() {
 function showigal(name) {
     aniMt.stop();
     animpaused = true;
+    _gaq.push(['_trackEvent', 'Iframe Gallery', 'Show', name]);
     $("#igallery iframe").attr("src", name).css({"width":(winwidth*0.8),"height":(winheight*0.8)});
     $("#igallery").css({"display":"block","opacity":"1"});
     $("#backdrop").css("display", "block").animate({"opacity": "0.8"},2000);
 }
 function hideigal() {
+    _gaq.push(['_trackEvent', 'Iframe Gallery', 'Hide', 'do']);
     $("#igallery, #backdrop").animate({"opacity": "0"},2000, 
         function(){$(this).css("display","none"); $("#igallery iframe").attr("src", "");
         });
@@ -425,8 +430,18 @@ $(document).ready(function() {
 	$("#wshower").click(function(){setWeather(400, $(this)) });
 	$("#wstorm").click(function(){setWeather(120, $(this)) });
 	
-	$("#gamestart, #gamecontinue").click(function(){startgame()});
-	$("#gamecancel, #gamequit").click(function(){showsite() });
+	$("#gamestart").click(function(){
+        _gaq.push(['_trackEvent', 'Game action', 'Game start', 'new game']);
+        startgame();
+    });
+	$("#gamecontinue").click(function(){
+        _gaq.push(['_trackEvent', 'Game action', 'Game start', 'restart game']);
+        startgame();
+    });
+	$("#gamecancel, #gamequit").click(function(){
+        _gaq.push(['_trackEvent', 'Game action', 'Game quit', 'do']);
+        showsite();
+    });
 //	$("#gamecancel").click(function(){aniMt.stop() });
 
 	//photo gallery
@@ -459,6 +474,7 @@ $(document).ready(function() {
 		var height = contents.height() + 46;
 		var maxheight = (winheight-topiccount*40);
 		if (height > maxheight) height = maxheight;
+        _gaq.push(['_trackEvent', 'Topic', curArea.attr('id'), 'show']);
 		if (seltopic == null) {
 			curArea.animate({"height": height},slidetime);
 			contents.animate({"height": height-46},slidetime);
@@ -510,6 +526,19 @@ $(document).ready(function() {
 }); //end document ready
 
 </script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28259376-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 <body> 
 <div id="backdrop"></div>
@@ -520,45 +549,33 @@ $(document).ready(function() {
 <div id="igallery">
     <iframe src="" frameborder="0" scrolling="auto"></iframe> 
 </div>
-<!--[if lt IE 9]>
-<img src="ring.gif" class="ring" id="ring_tpl">
-<img src="drop.gif" class="drop" id="drop_tpl">
-<div id="abg"></div>
-<div id="bg">
-<div class="fish" id="fish_l1"><img src="fish_l1.gif"></div>
-<div class="fish" id="fish_r1"><img src="fish_r1.gif"></div>
-<div class="fish" id="fish_l2"><img src="fish_l2.gif"></div>
-<div class="fish" id="fish_r2"><img src="fish_r2.gif"></div>
-<![endif]--> 
-<!--[if gte IE 9]-->
-<img src="ring.png" class="ring" id="ring_tpl">
-<img src="drop.png" class="drop" id="drop_tpl">
+<img src="ring.png" alt="ripple" class="ring" id="ring_tpl">
+<img src="drop.png" alt="drop" class="drop" id="drop_tpl">
 <div class="fadedtext" id="textfade"></div>
 <div id="abg"></div>
 <div id="bg">
-<div class="fish" id="fish_l1"><img src="fish_l1.png"></div>
-<div class="fish" id="fish_r1"><img src="fish_r1.png"></div>
-<div class="fish" id="fish_l2"><img src="fish_l2.png"></div>
-<div class="fish" id="fish_r2"><img src="fish_r2.png"></div>
-<!--[endif]-->
+<div class="fish" id="fish_l1"><img alt="fish" src="fish_l1.png"></div>
+<div class="fish" id="fish_r1"><img alt="fish" src="fish_r1.png"></div>
+<div class="fish" id="fish_l2"><img alt="fish" src="fish_l2.png"></div>
+<div class="fish" id="fish_r2"><img alt="fish" src="fish_r2.png"></div>
 <div id="gameoverbox" class="bluebg">
 <p class="title">Game Over!</p>
 <p style="margin-top:14px;"><span id="overadj"></span> You caught</p>
 <p id="overscore" class="title">10</p>
 <p>tasty little fishes.</p>
 <p style="margin-top:14px">Click to share this amazing feat with your friends!</p>
-<p><a id="fblink" title="Share on Facebook" href="#" target="_blank" onclick="window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-fb.png" alt="Facebook"></a>
+<p><a id="fblink" title="Share on Facebook" href="#" target="_blank" onclick="_gaq.push(['_trackEvent', 'Game action', 'Share opened', 'Facebook']);window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-fb.png" alt="Facebook"></a>
 &nbsp;&nbsp; 
-<a id="twlink" title="Share on Twitter" href="#" target="_blank" onclick="window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-tw.png" alt="Twitter"></a>
+<a id="twlink" title="Share on Twitter" href="#" target="_blank" onclick="_gaq.push(['_trackEvent', 'Game action', 'Share opened', 'Twitter']);window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-tw.png" alt="Twitter"></a>
 <p style="margin-top:10px"><span id="gamecontinue" class="link">Play another round</span> &nbsp;&nbsp;
 <span id="gamequit" class="link">Return to website</span></p>
 </div>
 
 <div id="wreport" class="headerbox bluebg noevs">
 <div><b>Today's weather</b></div>
-<img src="weather-sun.png" id="wsun">
-<img src="weather-shower.png" id="wshower" class="sel">
-<img src="weather-storm.png" id="wstorm">
+<img alt="sunny weather" src="weather-sun.png" id="wsun">
+<img alt="slight rain" src="weather-shower.png" id="wshower" class="sel">
+<img alt="heavy rain" src="weather-storm.png" id="wstorm">
 </div>
 
 <div id="gamebox" class="headerbox bluebg noevs">
@@ -579,7 +596,7 @@ $(document).ready(function() {
 <div id="about" class="topicbox noevs">
 <h1 class="topic">Hi there! &nbsp;I'm Tuomas Tanner</h1>
 <div class="topiccont">
-<img src="tuomas.jpg" style="float:left;margin-top:4px">
+    <img alt="Tuomas Tanner Portrait" src="tuomas.jpg" style="float:left;margin-top:4px">
 <div style="margin-left:130px">
 <h2 style="margin-top:0" class="bottomborder">I'm a</h2>
 <p>Master <span class="gray">(of Computer Science)</span> &amp; Bachelor <span class="gray">(of English)</span></p>
@@ -616,13 +633,13 @@ $(document).ready(function() {
 
 <div id="portfolio" class="topicbox noevs">
 <h2 class="topic">Portfolio</h2>
-<div  class="topiccont">
-<h1 style="margin-top:0px">Work projects</h1>
+<div class="topiccont">
+<h1 class="topborder" style="margin-top:0px">Work projects</h1>
 
 <h2 class="topborder">TypingMaster Online</h2>
 <div style="float:right;padding:0 6px">
-<p><img class="allborder" src="portfolio/tmonline2.png"></p>
-<p><img class="allborder"  src="portfolio/tmonline.png"></p>
+<p><img class="allborder" alt="TypingMaster Online" src="portfolio/tmonline2.png"></p>
+<p><img class="allborder"  alt="TypingMaster Online" src="portfolio/tmonline.png"></p>
 </div>
 <div style="min-height:360px">
 <p>TypingMaster Online is currently the company's main product offering for educational and large business customers. It is a SaaS learning product with a total of over 150 000 users.</p>
@@ -649,7 +666,40 @@ $(document).ready(function() {
 <p>I was the lead developer also for this project. The TypingMaster Online was customized by adding the SCORM zip file creation features and removing the user management portion of the manager (since user management is done in the LMS).</p>
 <p>More information at the <a href="http://www.typingmaster.com/business/lms" target="_blank">product home page</a>.</p>
 
+<h2 class="topborder">TypingTest.com website</h2>
+<div style="float:right;padding:0 6px">
+<p><img class="allborder" alt="TypingTest.com" src="portfolio/typingtest.png"></p>
+<p><img class="allborder"  alt="TypingTest.com" src="portfolio/typingtest2.png"></p>
+</div>
+<div style="min-height:440px">
+<p><a href="http://www.typingtest.com" target="_blank">TypingTest.com</a> is our popular web site for taking free typing tests. It currently has 1.5 million monthly visitors, who each spend an average of 7 minutes on the site (i.e. user engagement on the site is very high). Apart from the flash typing test component, I have been responsible for all the front and back end development of the web site. </p>
+<p>The results screen (first screenshot) was done as a combination of back end and front end techniques. If a test taker types slowly, we promote our own typing product along with displaying motivational information on how learning touch typing improves typing speed. If the user types quickly, we display the social sharing buttons so that these typing enthusiasts will be able to spread the word to their social circles.</p>
+<p>I was also responsible for the front end development of <a href="http://www.typingtest.com/toucht-typing/" target="_blank">motivational pages for touch typing</a> (second screenshot). These pages use jQuery animations to provide a visually pleasing message explaining the benefits of touch typing. These animations are compatible with all browsers from IE6 onwards.</p>
+<p> In addition to the free typing test, we have created a <a href="http://www.typingtest.com/online-tutor/" target="_blank"> consumer version of our TypingMaster Online product</a>. 
+</p>
+<p>This typing tutor is a customized version of our TypingMaster Online product.  It has a custom template that blends into the TypingTest.com website. Also the login has been streamlined and licensing has been reworked to allow single users to purchase licenses instead of a bulk license for an organization. Another nice addition is the instant demo which launches a quick introductory lesson immediately.</p>
+</div>
+<h1 class="topborder" style="margin-top:0px">Academic projects</h1>
+<h2 class="topborder"><a href="http://www.inderscience.com/browse/index.php?journalID=87&year=2010&vol=5&issue=4" target="_blank">Scientific Paper published in the International Journal of Learning Technology</a></h2>
+<p>My Master's Thesis was a project to apply machine learning methods to the study data we had gathered in TypingMaster Online. The goal was to find information that would help the teacher find students in need of help.</p>
+<p>The project was a success and made it into the TypingMaster Online program as the <a href="http://www.typingmaster.com/education/spotlight.asp" target="_blank"> Student Forecast -feature</a>.</p>
+<p>Also the Master's Thesis paper turned out well. My supervising professor Hannu Toivonen suggested that we turn it into an academic paper and submit it to the academic journals for publication. On December 2011, International Journal of Learning Technology decided to publish the article after peer review. The details and abstract of the article are below:</p>
+<h2> Predicting and preventing student failure – using the k-nearest neighbour method to predict student performance in an online course environment</h2>
+<p>International Journal of Learning Technology - Authors: Tuomas Tanner, Hannu Toivonen</p>
+<p class="gray" style="font-size: 11px">We study the problem of predicting student performance in an online course. Our specific goal is to identify at an early stage of the course those students who have a high risk of failing. We employ the k-nearest neighbour method (KNN) and its many variants on this problem. We present extensive experimental results from a 12-lesson course on touch-typing, with a database of close to 15,000 students. The results indicate that KNN can predict student performance accurately, and already after the very first lessons. We conclude that early tests on skills can also be strong predictors for final scores also in other skill-based courses. Selected methods described in this paper will be implemented as an early warning feature for teachers of the touch-typing course, so they can quickly focus their attention to the students who need help the most.</p>
+<p>Full article available at: <a href="http://www.cs.helsinki.fi/u/htoivone/pubs/ijlt2010.pdf" target="_blank">http://www.cs.helsinki.fi/u/htoivone/pubs/ijlt2010.pdf</a></p>
+<p style="margin:16px 0 20px 0" class="gray">More academic papers coming soon..</p>
+<h1 class="topborder" style="margin-top:0px">Personal projects</h1>
+<h2 class="topborder">This website</h2>
+<p>This website started off as a way to learn more about jQuery and DOM animations. However, early on I discovered that jQuery was not a good fit for animating many objects at once. This is because jQuery creates a separate timer for each animation. When I tried the background rain animation, browsers froze up after 10 or so water drops.</p>
+<p>I then started investigating a more manageable method of animating DOM objects and came up with <a href="animt.js" target="_blank">AniMt.js</a> This is a simple animation framework with a list of animation objects and two timers - one timer for moving the objects and processing interactions and one timer to render them.</p>
+<p>This framework is generic and can be used to animate anything, (objects on canvas etc.) The framework provides methods to start, stop, add and remove timers easily. For example this website pauses all animation when focus is moved away from it. This eliminates the cpu load when tab is left in the backgroud.</p>
+<p>The background and game animations are done with this animation framework. The other animations such as the accordion menu for topics and photo gallery etc. are done with jQuery animations, due to the convenience that jQuery provides.</p>
+<p>If you wish to learn more about the techniques used in this site, <a href="#" class="sposti">email me</a> and / or "Use the source Luke!"</p>
+<p class="topborder gray">More personal projects coming soon..</p>
 
+
+<!-- End Portfolio-->
 </div>
 </div>
 
@@ -661,10 +711,12 @@ $(document).ready(function() {
 <h2 id="showdance" class="link">Watch me dance</h2>
 <p>A fun little experiment in music making and flash animation done many many years ago.</p>
 <h2 id="showhits" class="link">Hear me rok</h2>
-<p>A very very very ancient compilation of my strangest MOD music. This just shows you I have no shame.</p>
+<p>A very very very ancient compilation of my strangest MOD music. This just shows you - I have no shame.</p>
 </div>
 </div>
-</div> 
+    
+<!-- End Topics-->
+</div>
 
 </div>
 </body>
