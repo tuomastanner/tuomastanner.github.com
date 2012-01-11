@@ -6,9 +6,6 @@ body {
 	margin: 0;
 	padding:0;
 }
-strong, em, b, i {
-    font-family: "Lucida Sans", "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
-}
 a {
 color:#000;
 }
@@ -29,17 +26,17 @@ li {
 }
 
 h1 {
-	font-family: "Lucida Sans", "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 18px;
 	margin: 12px 0 5px 0;
 }
 h2 {
-	font-family: "Lucida Sans", "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 14px;
 	margin: 12px 0 5px 0;
 }
 h3 {
-	font-family: "Lucida Sans", "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 13px;
 	margin: 12px 0 5px 0;
 }
@@ -299,6 +296,7 @@ div.topicbox {
 	overflow:hidden;
 }
 .topic {
+    height:18px;
 	cursor:pointer;
 	padding:4px 10px 6px 10px;
 	margin: 0;
@@ -309,7 +307,6 @@ div.topicbox {
 }
 h1.topic {
 	padding-top:2px;
-	padding-bottom:3px;
 }
 .topiccont {
 	margin: 6px 10px;
