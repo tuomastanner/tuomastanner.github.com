@@ -31,6 +31,7 @@ var aniMt = {
 			if (el == null) continue;
 			if (el.id == id) return el;
 		}
+        return null;
 	},
 	remObj: function(id) {
 		for (var i in this.list) {

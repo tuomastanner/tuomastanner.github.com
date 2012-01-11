@@ -4,8 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Tuomas Tanner - web application programmer and javascript enthusiast</title>
 <meta name="description" content="Tuomas Tanner is the lead software developer at TypingMaster.com. Come over and play the fun fishing game and have a look at some nice photos.">
-<meta property="og:description" content="Tuomas Tanner is the lead software developer at TypingMaster.com. Come over and play the fun fishing game and have a look at some nice photos." />
-<meta property="og:image" content="http://tuomastanner.github.com/tuomas.jpg" />
+<meta property="og:description" content="Tuomas Tanner is the lead software developer at TypingMaster.com. Come over and play the fun fishing game and have a look at some nice photos." >
+<meta property="og:image" content="http://tuomastanner.github.com/tuomas.jpg">
 
 <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 <link href="styles.css" rel="stylesheet" type="text/css">
@@ -331,6 +331,7 @@ function showsite() {
 //gallery functions
 var galphotos = ["1-P6056488.JPG","2-P6252429.JPG","3-P6046480.JPG","4-P6252486.JPG","5-PA163932.JPG","6-P6086542.JPG","7-PA153848.JPG","8-PA173935.JPG","9-PA173939.JPG","10-PA173945.JPG","11-P8059871.JPG","12-P8059844.JPG","13-P8059841.JPG","14-P8059853.JPG","15-PA010643.JPG","16-PA040760.JPG","17-PA040756.JPG","18-PA040765.JPG","19-PA010730.JPG","20-PA200949.JPG","21-P2054526.JPG"];
 var galidx = 0;
+var prefetch = 1;
 var animpaused = false;
 var curphoto = null;
 function scalephoto(photo) {
@@ -360,9 +361,21 @@ function showgal() {
     _gaq.push(['_trackEvent', 'Photo Gallery', 'Show', 'do']);
 	loadphoto();
 }
-function changephoto() {
+function changephoto(button) {
+    if (button.attr("id") == "nextphoto") {
+        ++galidx;
+        if (galidx > galphotos.length-1) galidx = 0;
+        if (galidx<galphotos.length-1) prefetch = galidx+1;
+    }
+    else {
+        --galidx;
+		if (galidx<0) galidx = galphotos.length-1;
+        if (galidx>0) prefetch = galidx-1;;
+    }
 	curphoto.animate({"opacity": "0"},2000, function(){$(this).remove()});
-	loadphoto()
+	loadphoto();
+    $("#prefetchimg").attr("src", "gallery/"+ galphotos[prefetch]);
+    
 }
 function loadphoto() {
     _gaq.push(['_trackEvent', 'Photo Gallery', 'Load photo', galphotos[galidx]]);
@@ -370,6 +383,7 @@ function loadphoto() {
     curphoto.children().click(function(e){e.stopPropagation()}).load(function() {scalephoto($(this))});
 	$("#gallery").append(curphoto);
 	curphoto.animate({"opacity": "1"},2000);
+    $("#prefetchimg").attr("src", "gallery/"+ galphotos[prefetch]);    
 }
 function hidegal() {
     _gaq.push(['_trackEvent', 'Photo Gallery', 'Hide', 'do']);
@@ -450,17 +464,9 @@ $(document).ready(function() {
 
 	//photo gallery
 	$("#photogal").click(function(){  showgal(); });
-    $("#nextphoto").click(function() {
-		++galidx;
-		if (galidx>=galphotos.length) galidx = 0;
-		changephoto();
-	});
-    $("#prevphoto").click(function() {
-		--galidx;
-		if (galidx<0) galidx = galphotos.length-1;
-		changephoto();
-	});
 	$("#gallery").click(function() {hidegal()});
+    $("#nextphoto, #prevphoto").click(function() { changephoto($(this)); });
+    $("#prefetchimg").attr("src", "gallery/"+ galphotos[0]);
     
     //iframe galleries
     $("#showdance").click(function(){showigal("subsonic.html"); });
@@ -505,7 +511,7 @@ $(document).ready(function() {
 			type: 'profile',
 			rpp: 5,
 			interval: 30000,
-			width: winwidth-300,
+			width: (winwidth-300),
 			height: 300,
 			theme: {
 			shell: {
@@ -549,6 +555,8 @@ $(document).ready(function() {
 <div id="gallery">
     <div style="right:30px" id="nextphoto" class="noevs">&gt;</div>
     <div style="left:30px" id="prevphoto" class="noevs">&lt;</div>
+    <div id="galphoto"></div>
+    <img id="prefetchimg" src="">
 </div>
 <div id="igallery">
     <iframe src="" frameborder="0" scrolling="auto"></iframe> 
