@@ -1,0 +1,670 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Tuomas Tanner - programmer</title>
+<link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
+<link href="styles.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="animt.js"></script>
+<script type="text/javascript">
+var abg = null;
+var fbg = null;
+function ring(x, y, spd, decay) {
+	var scale = 0.1+(y/800);
+	var el = getEl("ring_tpl").cloneNode(false);
+	el.id = null;
+	el.style.left = (x-6)+"px";
+	el.style.top = (y-2)+"px";
+    abg.appendChild(el);
+	aniMt.addObj({
+		id: "ring"+x+y,
+		emt: el,
+		curX: (x-6),
+		curY: (y-2),
+		w: 12,
+		h: 4,
+		spd: spd*scale,
+		decay: decay,
+		opc: 1.0,
+		move: function() {
+			this.opc -= this.decay;
+			if (this.opc <= 0.001) return true;
+			this.w += this.spd;
+			this.h = this.w/3;
+			this.curX -= this.spd/2;
+			this.curY -= this.spd/4;
+		},
+		render: function() {
+			this.emt.style.opacity = this.opc;
+			this.emt.style.filter = "alpha(opacity=" + (this.opc*100) + ")";
+			this.emt.style.width = this.w + "px";
+			this.emt.style.height = this.h + "px";
+			this.emt.style.left = this.curX + "px";
+			this.emt.style.top = this.curY + "px";
+		},
+		finalize: function() {
+			abg.removeChild(this.emt); 
+		}
+	});
+}
+function raindrop(x, y) {
+	var scale = 0.1+(y/1000);
+	var el = getEl("drop_tpl").cloneNode(false);
+	el.id = null;
+	el.style.width = Math.round(6*scale)+"px";
+	el.style.height = Math.round(10*scale)+"px";
+	el.style.left = x+"px";
+    abg.appendChild(el);
+	aniMt.addObj({
+		id: "drop"+x+y,
+		emt: el,
+		curX: x,
+		curY: -10,
+		toY: y,
+		spd: Math.round(16*scale),
+		opc: 1,
+		move: function() {
+			this.curY += this.spd;
+			if (this.curY > this.toY) {
+				this.render(); //final pos render
+				ring(this.curX, this.curY, 2.5, 0.01);
+				this.spd = 0.2;
+				this.move = function() {
+					this.opc -= this.spd;
+					if (this.opc <= 0.001) return true;
+				}
+				this.render = function() {
+					this.emt.style.opacity = this.opc;
+					this.emt.style.filter = "alpha(opacity=" + (this.opc*100) + ")";
+				}
+			}
+		},
+		render: function() {
+			this.emt.style.top = this.curY + "px";
+		},
+		finalize: function() {
+			abg.removeChild(this.emt);
+		}
+	});
+}
+function fishjump(startx, starty, velx, vely) {
+	var scale = 0.1+(starty/800);
+	var dir = "r";
+	if (velx < 0) dir = "l";
+	
+	var el = getEl("fish_" + dir + randInt(1,2)).cloneNode(true);
+	var img = el.childNodes[0];
+	el.id = "fish"+startx+starty;
+	el.onmousedown = function(){
+		var aniObj = aniMt.getObj(el.id);
+		if (!aniObj.caught) {
+			aniObj.caught = true;
+			++fishscore;
+			getEl("fishscore").innerHTML = fishscore;
+			aniObj.move = function(){
+				this.curW += 20;
+				this.curH += 10;
+				this.curX -= 10;
+				this.opc -= 0.04;
+				if(this.curW > 500) return true;
+			};
+			aniObj.render = function(){
+				this.emt.style.left = this.curX+"px";
+				this.emt.style.width = this.curW+"px";
+				this.emt.style.height = this.curH+"px";
+				this.img.style.width = this.curW+"px";
+				this.img.style.height = this.curH+"px";
+				this.img.style.opacity = this.opc;
+				this.img.style.filter = "alpha(opacity=" + (this.opc*100) + ")";
+			}
+		}
+		return false;
+	};
+    var width = Math.round(100*scale);
+    var height = Math.round(51*scale);
+	img.style.width = width+"px";
+	img.style.height = height+"px";
+	el.style.width = width+"px";
+	el.style.left = startx+"px";
+	el.style.top = starty+"px";
+    fbg.appendChild(el);
+	
+	ring(startx+width/2, starty+height/2, 5, 0.025);
+	aniMt.addObj({
+		emt: el,
+		img: img,
+		id: el.id,
+		waterlevel: starty,
+		scale: scale,
+		curW: width,
+        curH: 0,
+        maxH: height,
+		curX: startx,
+		curY: starty,
+		dx: velx*scale,
+		dy: -vely*scale,
+		gravity: 0.4*scale,
+//		gravity: 0.2,
+		opc: 1,
+		caught: false,
+		move: function() {
+			this.dy += this.gravity;
+			this.curX += this.dx;
+			this.curY += this.dy;
+			this.curH += -this.dy;
+			if (this.curH >= this.maxH || this.dy > 0) { //all grown or going down
+				this.move = function() {
+					this.dy += this.gravity;
+					this.curX += this.dx;
+					this.curY += this.dy;
+					if (this.curY > this.waterlevel-(this.curH/2)) { //hits water
+						var posX = this.curX+this.curW/3;
+						if(this.dx > 0) posX = this.curX+this.curW/1.5;
+						ring(posX, this.curY+this.curH, 5, 0.02);
+						this.move = function() {
+							this.dy += this.gravity;
+							this.curX += this.dx;
+							this.curY += this.dy;
+							this.curH += -this.dy;
+							if (this.curH <= 0) return true;
+						}
+					}
+				}
+			}
+		},
+		render: function() {
+			this.emt.style.top = this.curY + "px";
+			this.emt.style.left = this.curX + "px";
+			this.emt.style.height = this.curH + "px";
+		},
+		finalize: function() {
+			fbg.removeChild(this.emt);
+		}
+	});
+}
+
+function randomDrop() {
+	raindrop(randInt(60, winwidth-60), randInt(60, winheight-140))
+};
+//page globals
+var curmouse = [0,0];
+var prevmouse = [0,0];
+function ripple() {
+	if (Math.abs(curmouse[0]-prevmouse[0]) > 8 || 
+		Math.abs(curmouse[1]-prevmouse[1]) > 8) {
+		splash(1);
+		ring(curmouse[0], curmouse[1], 3, 0.025);
+		prevmouse[0] = curmouse[0];
+		prevmouse[1] = curmouse[1];
+	}
+}
+//page globals
+var splashes = 0;
+var reqsplashes = 20;
+function splash(amt) {
+	splashes += amt;
+	if (splashes > reqsplashes) { //make a random fish jump
+		splashes = 0;
+		reqsplashes = randInt(20, 40);
+		var velx = randInt(2, 11);
+		if (Math.random() > 0.5) velx *= -1;
+		
+		var vely = randInt(6, 12);
+		var offset = Math.round(velx*vely*6);
+		var startx;
+		if (offset > 0) startx = randInt(50, $(window).width()-offset);
+		else startx = randInt(-offset, $(window).width()-50);
+		fishjump(startx, randInt(30, $(window).height()-100), velx, vely);
+	}
+}
+function setWeather(delay, el) {
+	aniMt.remTimer("rain");
+	if (delay > 0) aniMt.addTimer("rain", "randomDrop()", delay);
+	$("#wreport>img").removeClass("sel");
+	el.addClass("sel");
+}
+function textfade(texts, show, callback) {
+	var targetsize = 80;
+	var x = 0;//winwidth/2;
+	var y = winheight/3;
+	
+	var curtext = texts[show];
+	var el = getEl("textfade").cloneNode(false);
+	el.id = null;
+	el.style.fontSize = "0px";
+	el.style.left = x+"px";
+	el.style.top = y+"px";
+	el.style.width = winwidth + "px";
+    abg.appendChild(el);
+	el.innerHTML = curtext;
+	aniMt.addObj({
+		emt: el,
+		texts: texts,
+		show: show,
+		callback: callback,
+		size: 0,
+		targetsize: targetsize,
+		curX: x,
+		curY: y,
+		opc: 1,
+		targetdelay:20,
+		move: function() {
+			if (this.size >= this.targetsize) {
+				--this.targetdelay;
+				if (this.targetdelay<0) {
+					this.render(); //final pos render
+					++this.show;
+					if (this.texts[this.show] != null) {
+						textfade(this.texts,this.show,this.callback);
+						return true;
+					}
+					else {
+						//start the game
+						fishscore = 0;
+						starttimer();
+						return true;
+					}
+				}
+			} else { //make it grow
+				this.size += 3;
+			}
+		},
+		render: function() {
+			this.emt.style.fontSize = this.size + "px";
+		},
+		finalize: function() {
+			abg.removeChild(this.emt);
+		}
+	});
+}
+
+//page globals
+var fishscore = 0;
+var secsleft = 0;
+function startgame() {
+	aniMt.remTimer("gamesecs");
+	fishscore=0;
+	secsleft=60;
+	getEl("fishscore").innerHTML = fishscore;
+	getEl("secsleft").innerHTML = secsleft;
+	$("#gamewelcome").hide();
+	$("#scoreboard").show();
+	$("#wreport, #namebox, #gameoverbox, .topicbox").animate({"opacity": "0"},400, function(){ $(this).css("display", "none") });
+	textfade(["Ready","Steady","GO FISH!"],0);
+}
+function starttimer() {
+	aniMt.addTimer("gamesecs", "gamesectick()", 1000);
+}
+function gamesectick() {
+	--secsleft;
+	getEl("secsleft").innerHTML = secsleft;
+	if (secsleft <= 0) endgame();
+}
+function endgame() {
+	aniMt.remTimer("gamesecs");
+	var scoreid = Math.floor(fishscore/5);
+	var adjectives = ["Oh dear, they got away.", "Not too shabby.", "Quite good!","Excellent!","Astounding!","Ridonculous!","Supercalifragilisticexpialadocious!"];
+	if(scoreid > 6) scoreid = 6;
+	getEl("overscore").innerHTML = fishscore;
+	getEl("overadj").innerHTML = adjectives[scoreid];
+	var fblink = "http://www.facebook.com/sharer.php?s=100&p[title]=I+caught+" + fishscore + "+tasty+fishes!+Try+and+beat+that!&p[summary]=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+and+caught+" + fishscore + "+tasty+fishes.+Try+it+and+let's+see+who's+the+better+fisherman!&p[url]=http%3A%2F%2Ftuomastanner.github.com&p[images][0]=fish_r1.png";
+	getEl("fblink").href = fblink;
+	var twlink = "http://twitter.com/home?status=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+at+http%3A%2F%2Ftuomastanner.github.com+and+got+" + fishscore + "+tasty+fishes!+Try+and+beat+that!"
+	getEl("twlink").href = twlink;
+	$("#gameoverbox").css({"top":(winheight/4)+"px","left":(winwidth/2-150)+"px","display":"block","opacity": "0.8"});
+	//alert("Game Over! You caught " + fishscore + " fishes.");
+}
+function showsite() {
+	aniMt.remTimer("gamesecs");
+	$("#wreport, #namebox, .topicbox").css("display", "block").animate({"opacity": "0.8"},400);
+	$("#gameoverbox").css("display","none");
+	$("#scoreboard").hide();
+	$("#gamewelcome").show();
+}
+
+//gallery functions
+var galphotos = ["1-P6056488.JPG","2-P6252429.JPG","3-P6046480.JPG","4-P6252486.JPG","5-PA163932.JPG","6-P6086542.JPG","7-PA153848.JPG","8-PA173935.JPG","9-PA173939.JPG","10-PA173945.JPG","11-P8059871.JPG","12-P8059844.JPG","13-P8059841.JPG","14-P8059853.JPG","15-PA010643.JPG","16-PA040760.JPG","17-PA040756.JPG","18-PA040765.JPG","19-PA010730.JPG","20-PA200949.JPG","21-P2054526.JPG"];
+var galidx = 0;
+var animpaused = false;
+var curphoto = null;
+function scalephoto(photo) {
+    var photowidth = photo.width();
+    var photoheight = photo.height();
+    var hscale = 1;
+    var vscale = 1;
+    if (photowidth > winwidth-100) {
+        hscale = (winwidth-100)/photowidth;
+    }
+    if (photoheight > winheight-40) {
+        vscale = (winheight-40)/photoheight;
+    }
+	if (vscale < 1 || hscale < 1) {
+		if (vscale < hscale) hscale = vscale;
+        photowidth = Math.round(hscale*photowidth);
+        photoheight = Math.round(hscale*photoheight);
+		photo.width(photowidth);
+		photo.height(photoheight);
+	}
+}
+function showgal() {
+    aniMt.stop();
+    animpaused = true;
+    $("#gallery").css("display","block").animate({"opacity": "1"},2000);
+    $("#backdrop").css("display", "block").animate({"opacity": "0.8"},2000);
+	loadphoto();
+}
+function changephoto() {
+	curphoto.animate({"opacity": "0"},2000, function(){$(this).remove()});
+	loadphoto()
+}
+function loadphoto() {
+	curphoto = $('<div class="galphoto"><img src="gallery/'+ galphotos[galidx] + '"></div>');
+    curphoto.children().click(function(e){e.stopPropagation()}).load(function() {scalephoto($(this))});
+	$("#gallery").append(curphoto);
+	curphoto.animate({"opacity": "1"},2000);
+}
+function hidegal() {
+	curphoto.animate({"opacity": "0"},2000);
+    $("#gallery, #backdrop").animate({"opacity": "0"},2000, function(){$(this).css("display","none")});
+    animpaused = false;
+    aniMt.start();
+}
+function showigal(name) {
+    aniMt.stop();
+    animpaused = true;
+    $("#igallery iframe").attr("src", name).css({"width":(winwidth*0.8),"height":(winheight*0.8)});
+    $("#igallery").css({"display":"block","opacity":"1"});
+    $("#backdrop").css("display", "block").animate({"opacity": "0.8"},2000);
+}
+function hideigal() {
+    $("#igallery, #backdrop").animate({"opacity": "0"},2000, 
+        function(){$(this).css("display","none"); $("#igallery iframe").attr("src", "");
+        });
+    
+    animpaused = false;
+    aniMt.start();
+}
+var winheight = 0;
+var winwidth = 0;
+var topiccount = 4;
+var seltopic = null;
+var slidetime = 330;
+$(document).ready(function() {
+	abg = getEl("abg");
+	fbg = getEl("bg");
+	aniMt.start();
+	randomDrop();
+	aniMt.addTimer("rain", "randomDrop()", 400);
+	aniMt.addTimer("ripples", "ripple()", 150);	
+	//pause all animation & game on change of window or tab
+	$(window).blur(function(){aniMt.stop()}).focus(function(){if (!animpaused)aniMt.start()});
+	$(".noevs").click(function(e){e.stopPropagation()}).mousemove(function(e){e.stopPropagation()});
+	
+	//keep window size updated
+	winheight = $(window).height();
+	winwidth = $(window).width();
+	$(window).resize(function() {
+		winheight = $(window).height();
+		winwidth = $(window).width();
+	});
+	
+	//mouse splashes
+	$("#bg").css("height",winheight)
+		.click(function(e) {
+			ring(e.pageX, e.pageY, 4, 0.01);
+			splash(2);
+		})
+		.mousemove(function(e){
+			curmouse[0] = e.pageX;
+			curmouse[1] = e.pageY; 
+		});
+	//weather icons
+	$("#wsun").click(function(){setWeather(0, $(this)) });
+	$("#wshower").click(function(){setWeather(400, $(this)) });
+	$("#wstorm").click(function(){setWeather(120, $(this)) });
+	
+	$("#gamestart, #gamecontinue").click(function(){startgame()});
+	$("#gamecancel, #gamequit").click(function(){showsite() });
+//	$("#gamecancel").click(function(){aniMt.stop() });
+
+	//photo gallery
+	$("#photogal").click(function(){  showgal(); });
+    $("#nextphoto").click(function() {
+		++galidx;
+		if (galidx>=galphotos.length) galidx = 0;
+		changephoto();
+	});
+    $("#prevphoto").click(function() {
+		--galidx;
+		if (galidx<0) galidx = galphotos.length-1;
+		changephoto();
+	});
+	$("#gallery").click(function() {hidegal()});
+    
+    //iframe galleries
+    $("#showdance").click(function(){showigal("subsonic.html"); });
+    $("#showhits").click(function(){showigal("strangesthits/index.html"); });
+    $("#igallery").click(function(){hideigal(); });
+    
+    var sposti = ["tanne","tuomas.","ki.","r@i","fi","mai","lto:"];
+    $(".sposti").attr("href", sposti[5] + sposti[6] + sposti[1] + sposti[0] + sposti[3] + sposti[2] + sposti[4]);
+    
+	//topic accordion
+	$(".topic").click(function() {
+		var cur = $(this);
+		var curArea = cur.parent();
+		var contents = cur.next();
+		var height = contents.height() + 46;
+		var maxheight = (winheight-topiccount*40);
+		if (height > maxheight) height = maxheight;
+		if (seltopic == null) {
+			curArea.animate({"height": height},slidetime);
+			contents.animate({"height": height-46},slidetime);
+			seltopic = curArea;
+		} else {
+			seltopic.animate({"height": 26},slidetime);
+			seltopic.next({"height": 0},slidetime);
+			if (seltopic.attr("id") != curArea.attr("id")) {
+				curArea.animate({"height": height},slidetime);
+				contents.animate({"height": height-46},slidetime);
+				seltopic = curArea;
+			}
+			else {
+				seltopic = null;
+			}
+		}
+	});
+	
+	//load twitter only after everything else is ready to avoid lag
+    $.getScript('http://widgets.twimg.com/j/2/widget.js', function() {
+        var oTweet = new TWTR.Widget({
+			id: 'tweetshere',
+			version: 2,
+			type: 'profile',
+			rpp: 5,
+			interval: 30000,
+			width: winwidth-300,
+			height: 300,
+			theme: {
+			shell: {
+			  background: '#ffffff',
+			  color: '#000000'
+			},
+			tweets: {
+			  background: '#ffffff',
+			  color: '#000000',
+			  links: '#439ae6'
+			}
+			},
+			features: {
+			scrollbar: false,
+			loop: true,
+			live: false,
+			behavior: 'default'
+			}
+        }).render().setUser('tuomastanner').start();
+    });
+
+}); //end document ready
+
+</script>
+</head>
+<body> 
+<div id="backdrop"></div>
+<div id="gallery">
+    <div style="right:30px" id="nextphoto" class="noevs">&gt;</div>
+    <div style="left:30px" id="prevphoto" class="noevs">&lt;</div>
+</div>
+<div id="igallery">
+    <iframe src="" frameborder="0" scrolling="auto"></iframe> 
+</div>
+<!--[if lt IE 9]>
+<img src="ring.gif" class="ring" id="ring_tpl">
+<img src="drop.gif" class="drop" id="drop_tpl">
+<div id="abg"></div>
+<div id="bg">
+<div class="fish" id="fish_l1"><img src="fish_l1.gif"></div>
+<div class="fish" id="fish_r1"><img src="fish_r1.gif"></div>
+<div class="fish" id="fish_l2"><img src="fish_l2.gif"></div>
+<div class="fish" id="fish_r2"><img src="fish_r2.gif"></div>
+<![endif]--> 
+<!--[if gte IE 9]-->
+<img src="ring.png" class="ring" id="ring_tpl">
+<img src="drop.png" class="drop" id="drop_tpl">
+<div class="fadedtext" id="textfade"></div>
+<div id="abg"></div>
+<div id="bg">
+<div class="fish" id="fish_l1"><img src="fish_l1.png"></div>
+<div class="fish" id="fish_r1"><img src="fish_r1.png"></div>
+<div class="fish" id="fish_l2"><img src="fish_l2.png"></div>
+<div class="fish" id="fish_r2"><img src="fish_r2.png"></div>
+<!--[endif]-->
+<div id="gameoverbox" class="bluebg">
+<p class="title">Game Over!</p>
+<p style="margin-top:14px;"><span id="overadj"></span> You caught</p>
+<p id="overscore" class="title">10</p>
+<p>tasty little fishes.</p>
+<p style="margin-top:14px">Click to share this amazing feat with your friends!</p>
+<p><a id="fblink" title="Share on Facebook" href="#" target="_blank" onclick="window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-fb.png" alt="Facebook"></a>
+&nbsp;&nbsp; 
+<a id="twlink" title="Share on Twitter" href="#" target="_blank" onclick="window.open(this.href,'sharer','width=600,height=400,resizable=yes');return false;"><img src="icon-tw.png" alt="Twitter"></a>
+<p style="margin-top:10px"><span id="gamecontinue" class="link">Play another round</span> &nbsp;&nbsp;
+<span id="gamequit" class="link">Return to website</span></p>
+</div>
+
+<div id="wreport" class="headerbox bluebg noevs">
+<div><b>Today's weather</b></div>
+<img src="weather-sun.png" id="wsun">
+<img src="weather-shower.png" id="wshower" class="sel">
+<img src="weather-storm.png" id="wstorm">
+</div>
+
+<div id="gamebox" class="headerbox bluebg noevs">
+<p id="gametitle">FishCatcher 2012</p>
+<div id="scoreboard">
+<p><b id="secsleft">0</b> seconds remaining.</p>
+<p><b id="fishscore">0</b> fishes caught.</p>
+<p id="gamecancel" class="link">Quit Game</p>
+</div>
+<div id="gamewelcome">
+<p>How many fishes can you catch?!</p>
+<p id="gamestart" class="link"><b>Start Game</b></p>
+<p>Tip: Splash the water!</p>
+</div>
+</div>
+
+<div id="topics">
+<div id="about" class="topicbox noevs">
+<h1 class="topic">Hi there! &nbsp;I'm Tuomas Tanner</h1>
+<div class="topiccont">
+<img src="tuomas.jpg" style="float:left;margin-top:4px">
+<div style="margin-left:130px">
+<h2 style="margin-top:0" class="bottomborder">I'm a</h2>
+<p>Master <span class="gray">(of Computer Science)</span> &amp; Bachelor <span class="gray">(of English)</span></p>
+<p>Husband <span class="gray">(10 years and counting)</span>  &amp; Father <span class="gray">(of 3 boys)</span></p>
+<p>Lover <span class="gray">(of fine art &amp; good music)</span> &amp; Fighter <span class="gray">(I fire <a href="http://www.youtube.com/watch?v=LSXMhaFntrU" target="_blank">ze missiles</a>)</span></p>
+
+<h2 class="bottomborder">I'm professional</h2>
+<ul>
+<li>Lead Programmer at <a href="http://www.typingmaster.com" target="_blank">TypingMaster</a></li>
+<li>Experienced in creating scalable web applications, front to back.</li>
+<li>Very familiar with server side Java and HTML5+JS. At uni specialized in database design and data mining.</li>
+<li><a href="http://resume.linkedinlabs.com/l3jmw1qrx" target="_blank">My full CV / Resume</a> is available online.</li>
+<li>Have a look at my portfolio below to see what I've done.</li>
+<li>If you're interested in what I do, follow me on <a href="http://twitter.com/tuomastanner" target="_blank">Twitter</a> and join me on <a href="http://www.linkedin.com/pub/tuomas-tanner/3a/6/813" target="_blank">LinkedIn</a>. Or you can just send me an <a class="sposti" href="#">email</a>.
+</ul>
+<h2 class="bottomborder">and personal</h2>
+<ul>
+<li>Love my wife &amp; kids - not much time for anything else at the moment.</li>
+<li>Play a bit of classical guitar &amp; occasionally have fun with the electric.</li>
+<li>Love choral singing - especially Southern African. Used to sing with <a href="http://www.jakaranda.net/" target="_blank">Jakaranda</a>. Sadly no time for that anymore.</li>
+<li>Take a few photos now and again. Swim whenever I can.</li>
+<li>If I've met you face to face. Come over to <a href="http://www.facebook.com/tuomas.tanner" target="_blank">Facebook</a> and let's meet up again! (Mostly Finnish though)</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="tweets" class="topicbox noevs">
+<h2 class="topic">My Latest Tweets</h2>
+<div class="topiccont" id="tweetshere">
+</div>
+</div>
+
+<div id="portfolio" class="topicbox noevs">
+<h2 class="topic">Portfolio</h2>
+<div  class="topiccont">
+<h1 style="margin-top:0px">Work projects</h1>
+
+<h2 class="topborder">TypingMaster Online</h2>
+<div style="float:right;padding:0 6px">
+<p><img class="allborder" src="portfolio/tmonline2.png"></p>
+<p><img class="allborder"  src="portfolio/tmonline.png"></p>
+</div>
+<div style="min-height:360px">
+<p>TypingMaster Online is currently the company's main product offering for educational and large business customers. It is a SaaS learning product with a total of over 150 000 users.</p>
+<p>The product is available in 7 languages. Arabic version with full RTL support is due to be released soon.</p>
+<p>I am the lead technical designer and developer of the server product. The client typing tutor and courses already existed / were developed by others. TypingMaster Online is developed with Java Servlets + custom MVC template engine. JSP & JSTL weren't available due to JRE only -design constraint in installable TypingMaster Intra product. Data is stored in an SQL database with support for multiple vendors.</p>
+<p>TypingMaster Online was designed as an AICC standards compliant LMS (learning management system) with custom extensions for own courses.</p>
+<p>Latest addition to the program is the Student Forecast feature, which uses the KNN machine learning method to predict students' final test scores after a few lessons. This allows teachers to focus their efforts on the underachievers at an early stage. This feature is based on my Master's Thesis work and the subsequent publication in the International Journal of Learning Technology.</p>
+<p>I also set up the hosting environment and monitoring for the TypingMaster Online service. This autumn the service was moved from a VPS to a dedicated server. The VPS was suffering from I/O lag due to the hosting provider overselling their capacity. I evaluated possible dedicated server providers and specced the server with RAID 1 redundancy. After purchase, Linux and required server software was installed. The server was secured and appropriate hardware monitor scripts were set up. Database replication was set up to a separate identically configured dedicated server. Daily db backups were configured on the replication slave and downloaded daily off site. This setup allows us to have an instantly available hot spare of the service if anything happens to the main server. Also backups do not affect main server performance since they are done on the replication slave. Finally the full production database was moved to the new server resulting in 1,5 hours of downtime due to the sheer size of our data set. After the move we have had 100% uptime for three solid months.
+</p>
+<p>More information at the <a href="http://www.typingmaster.com/education/" target="_blank">product homepage</a>.</p>
+<p>You can also directly try live demos of the <a href="http://online3.typingmaster.com/studentlogin?id=demo&student_login=demo&student_pass=demo" target="_blank">Study Area</a> and <a href="http://online3.typingmaster.com/studentlogin?id=demo&student_login=demoadmin&student_pass=demo" target="_blank">Student Manager</a>.
+</div>
+<h2 class="topborder">TypingMaster Intra</h2>
+<p>TypingMaster Intra was developed in conjunction with TypingMaster Online as an installable version of our core product.</p>
+<p>At the time SaaS was very new and especially large organizations were not comfortable with using it. TypingMaster Intra gave customers a way to install the same service easily into their own intranet.</p>
+<p>TypingMaster Intra was developed as a multiplatform installable program since customers' intranets had diverse infrastructure. The installer included a JRE, a lightweight version of Tomcat and an internal SQL database. After installation, the customer could choose to use their own database server as a datastore. Several SQL databases are supported MySQL (also used in TypingMaster Online),HSQLDB (the default internal database), MSSQL and Oracle (for large TM Intra installations).</p>
+<p>In this project I was responsible for developing the main TypingMaster Intra in conjuction with TypingMaster Online. The Intra build was customized for a single account mode where account id's were never shown. The installer and lightweight Tomcat service were customized by others.</p>
+<p>The TypingMaster Intra product is current discontinued. <a href="http://www.typingmaster.com/business/lms/" target="_blank">Product support pages</a> are still available.
+
+<h2 class="topborder">TypingMaster for LMS</h2>
+<p>This project was undertaken to replace a labor intensive method of creating SCORM packages on customers' request. With this new online service customers can themselves configure typing courses and tests and easily integrate them to their LMS such as Moodle, Blackboard or Ilias.</p>
+<p>Supports two modes - online and and offline. In the default online mode, a thin wrapper package is installed to the customer's LMS. This launches the typing course on our server. This allows for granular license control based on total users or concurrent use. The results are then sent back to the wrapper in the LMS by using JSONP. The wrapper then saves the results to the LMS with SCORM commands.</p>
+<p>A standalone mode is also supported for high security environments. In this mode, the customer can choose to download the full SCORM package to their LMS. The zip file is built on demand by generating setting files and license for the typing tutor and adding required study files.</p>
+<p>I was the lead developer also for this project. The TypingMaster Online was customized by adding the SCORM zip file creation features and removing the user management portion of the manager (since user management is done in the LMS).</p>
+<p>More information at the <a href="http://www.typingmaster.com/business/lms" target="_blank">product home page</a>.</p>
+
+
+</div>
+</div>
+
+<div id="photos" class="topicbox noevs">
+<h2 class="topic">Photos and Fun</h2>
+<div class="topiccont">
+<h2 id="photogal" class="link">Gallery of photos throughout the year</h2>
+<p>If you would like to get bigger versions of these, just shoot me a message on FB, Twitter or <a class="sposti" href="#">email</a>.</p>
+<h2 id="showdance" class="link">Watch me dance</h2>
+<p>A fun little experiment in music making and flash animation done many many years ago.</p>
+<h2 id="showhits" class="link">Hear me rok</h2>
+<p>A very very very ancient compilation of my strangest MOD music. This just shows you I have no shame.</p>
+</div>
+</div>
+</div> 
+
+</div>
+</body>
+</html>
