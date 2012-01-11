@@ -2,9 +2,10 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Tuomas Tanner - programmer</title>
+<title>Tuomas Tanner - web application programmer and javascript enthusiast</title>
 <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 <link href="styles.css" rel="stylesheet" type="text/css">
+<link rel="shortcut icon" href="weather-sun.png" />
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="animt.js"></script>
 <script type="text/javascript">
@@ -308,7 +309,7 @@ function endgame() {
 	if(scoreid > 6) scoreid = 6;
 	getEl("overscore").innerHTML = fishscore;
 	getEl("overadj").innerHTML = adjectives[scoreid];
-	var fblink = "http://www.facebook.com/sharer.php?s=100&p[title]=I+caught+" + fishscore + "+tasty+fishes!+Try+and+beat+that!&p[summary]=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+and+caught+" + fishscore + "+tasty+fishes.+Try+it+and+let's+see+who's+the+better+fisherman!&p[url]=http%3A%2F%2Ftuomastanner.github.com&p[images][0]=fish_r1.png";
+	var fblink = "http://www.facebook.com/sharer.php?s=100&p[title]=I+caught+" + fishscore + "+tasty+fishes!+Try+and+beat+that!&p[summary]=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+and+caught+" + fishscore + "+tasty+fishes.+Try+it+and+let's+see+who's+the+better+fisherman!&p[url]=http%3A%2F%2Ftuomastanner.github.com&p[images][0]=http%3A%2F%2Ftuomastanner.github.com/fish_r1.png";
 	getEl("fblink").href = fblink;
 	var twlink = "http://twitter.com/home?status=I+played+the+awesome+FishCatcher+2012+game+by+Tuomas+Tanner+at+http%3A%2F%2Ftuomastanner.github.com+and+got+" + fishscore + "+tasty+fishes!+Try+and+beat+that!"
 	getEl("twlink").href = twlink;
