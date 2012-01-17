@@ -7,10 +7,16 @@
 }
 #gamebox {
     bottom:6px;
-    width:80px;
-    height:auto;
+    right:6px;
+    width:140px;
+    height:70px;
 }
 #topics {
     margin:10px;
-    opacity: 1;
+}
+div.topicbox {
+    opacity:1;
+}
+.topiccont {
+    overflow-y: scroll;
 }
