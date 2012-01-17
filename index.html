@@ -10,11 +10,12 @@
 
 <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" media="all" type="text/css" href="styles.css">
-<link rel="stylesheet" media="only screen and (max-width: 500px)" type="text/css" href="styles-mobi.css">
+<link rel="stylesheet" media="only screen and (max-width: 800px)" type="text/css" href="styles-mobi.css">
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no,initial-scale=1.0, minimum-scale=1.0">
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="animt.js"></script>
+<script type="text/javascript" src="iscroll-lite.js"></script>
 <script type="text/javascript">
 var abg = null;
 var fbg = null;
@@ -333,10 +334,10 @@ function showsite() {
 
 //gallery functions
 var galphotos = ["1-P6056488.JPG","2-P6252429.JPG","3-P6046480.JPG","4-P6252486.JPG","5-PA163932.JPG","6-P6086542.JPG","7-PA153848.JPG","8-PA173935.JPG","9-PA173939.JPG","10-PA173945.JPG","11-P8059871.JPG","12-P8059844.JPG","13-P8059841.JPG","14-P8059853.JPG","15-PA010643.JPG","16-PA040760.JPG","17-PA040756.JPG","18-PA040765.JPG","19-PA010730.JPG","20-PA200949.JPG","21-P2054526.JPG"];
-var galidx = 0;
-var prefetch = 1;
 var animpaused = false;
 var curphoto = null;
+var curidx = 0;
+var prefetch = 1;
 function scalephoto(photo) {
     var photowidth = photo.width();
     var photoheight = photo.height();
@@ -366,14 +367,14 @@ function showgal() {
 }
 function changephoto(button) {
     if (button.attr("id") == "nextphoto") {
-        ++galidx;
-        if (galidx > galphotos.length-1) galidx = 0;
-        if (galidx<galphotos.length-1) prefetch = galidx+1;
+        ++curidx;
+        if (curidx > galphotos.length-1) curidx = 0;
+        if (curidx<galphotos.length-1) prefetch = curidx+1;
     }
     else {
-        --galidx;
-		if (galidx<0) galidx = galphotos.length-1;
-        if (galidx>0) prefetch = galidx-1;;
+        --curidx;
+		if (curidx<0) curidx = galphotos.length-1;
+        if (curidx>0) prefetch = curidx-1;;
     }
 	curphoto.animate({"opacity": "0"},2000, function(){$(this).remove()});
 	loadphoto();
@@ -435,13 +436,18 @@ $(document).ready(function() {
 	});
 	
     var twwidth = winwidth-300;
+    var myScroll;
     //set mobile layout
-    if (winwidth <= 500) {
+    if (winwidth <= 800) {
         twwidth = winwidth-50;
         //hide address bar
         //$("html").scrollTop(1);
-        setTimeout(function() { window.scrollTo(0, 1); }, 1);
+        setTimeout(function() { 
+            window.scrollTo(0, 1); 
+            $("#gamebox").css("top", winheight-76);}, 3);
         $("body").bind('touchmove',function(e){ e.stopPropagation();e.preventDefault(); });
+        $("#gamebox").css("top", winheight-76);
+        
     }
     else { //start rain
         randomDrop();
@@ -499,17 +505,22 @@ $(document).ready(function() {
 		var height = contents.height() + 46;
 		var maxheight = (winheight-topiccount*40);
 		if (height > maxheight) height = maxheight;
-        _gaq.push(['_trackEvent', 'Topic', curArea.attr('id'), 'show']);
+        var topicid = curArea.attr('id');
+        _gaq.push(['_trackEvent', 'Topic', topicid, 'show']);
 		if (seltopic == null) {
 			curArea.animate({"height": height},slidetime);
-			contents.animate({"height": height-46},slidetime);
+			contents.animate({"height": height-46},slidetime, function() {
+                if (topicid == "portfolio") myScroll = new iScroll(contents);
+            });
 			seltopic = curArea;
 		} else {
 			seltopic.animate({"height": 26},slidetime);
 			seltopic.next({"height": 0},slidetime);
 			if (seltopic.attr("id") != curArea.attr("id")) {
 				curArea.animate({"height": height},slidetime);
-				contents.animate({"height": height-46},slidetime);
+				contents.animate({"height": height-46},slidetime, function() {
+                    if (topicid == "portfolio") myScroll = new iScroll(contents);
+                });
 				seltopic = curArea;
 			}
 			else {
@@ -569,7 +580,7 @@ $(document).ready(function() {
     <div style="right:30px" id="nextphoto" class="noevs">&gt;</div>
     <div style="left:30px" id="prevphoto" class="noevs">&lt;</div>
     <div id="galphoto"></div>
-    <img id="prefetchimg" src="">
+    <img id="prefetchimg" alt="next image" src="">
 </div>
 <div id="igallery">
     <iframe src="" frameborder="0" scrolling="auto"></iframe> 
@@ -621,6 +632,7 @@ $(document).ready(function() {
 <div id="about" class="topicbox noevs">
 <h1 class="topic">Hi there! &nbsp;I'm Tuomas Tanner</h1>
 <div class="topiccont">
+    <div class="scroller">
     <img alt="Tuomas Tanner Portrait" src="tuomas.jpg" style="float:left;margin-top:4px">
 <div style="margin-left:130px">
 <h2 style="margin-top:0" class="bottomborder">I'm a</h2>
@@ -646,19 +658,21 @@ $(document).ready(function() {
 <li>If I've met you face to face. Come over to <a href="http://www.facebook.com/tuomas.tanner" target="_blank">Facebook</a> and let's meet up again! (Mostly Finnish though)</li>
 </ul>
 </div>
+</div><!--end-scroller-->
 </div>
-
 </div>
 
 <div id="tweets" class="topicbox noevs">
 <h2 class="topic">My Latest Tweets</h2>
-<div class="topiccont" id="tweetshere">
+<div class="topiccont">
+    <div id="tweetshere" class="scroller"></div>
 </div>
 </div>
 
 <div id="portfolio" class="topicbox noevs">
 <h2 class="topic">Portfolio</h2>
-<div class="topiccont">
+<div id="portfoliocont" class="topiccont">
+    <div class="scroller">
 <h1 class="topborder" style="margin-top:0px">Work projects</h1>
 
 <h2 class="topborder">TypingMaster Online</h2>
@@ -723,25 +737,25 @@ $(document).ready(function() {
 <p>If you wish to learn more about the techniques used in this site, <a href="#" class="sposti">email me</a> and / or "Use the source Luke!"</p>
 <p class="topborder gray">More personal projects coming soon..</p>
 
-
-<!-- End Portfolio-->
+</div><!--end-scroller-->
 </div>
 </div>
 
 <div id="photos" class="topicbox noevs">
 <h2 class="topic">Photos and Fun</h2>
 <div class="topiccont">
+    <div class="scroller">
 <h2 id="photogal" class="link">Gallery of photos throughout the year</h2>
 <p>If you would like to get bigger versions of these, just shoot me a message on FB, Twitter or <a class="sposti" href="#">email</a>.</p>
 <h2 id="showdance" class="link">Watch me dance</h2>
 <p>A fun little experiment in music making and flash animation done many many years ago.</p>
 <h2 id="showhits" class="link">Hear me rok</h2>
 <p>A very very very ancient compilation of my strangest MOD music. This just shows you - I have no shame.</p>
+</div><!--end-scroller-->
 </div>
 </div>
     
-<!-- End Topics-->
-</div>
+</div><!--End Topics-->
 
 </div>
 </body>
