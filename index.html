@@ -413,11 +413,18 @@ function hideigal() {
     animpaused = false;
     aniMt.start();
 }
+var myScroll;
+function mobiscroll(contents) {
+    if (winwidth <= 800) {
+        myScroll = new iScroll(contents);
+    }
+}
 var winheight = 0;
 var winwidth = 0;
 var topiccount = 4;
 var seltopic = null;
 var slidetime = 330;
+
 $(document).ready(function() {
 	abg = getEl("abg");
 	fbg = getEl("bg");
@@ -436,7 +443,6 @@ $(document).ready(function() {
 	});
 	
     var twwidth = winwidth-300;
-    var myScroll;
     //set mobile layout
     if (winwidth <= 800) {
         twwidth = winwidth-50;
@@ -444,9 +450,9 @@ $(document).ready(function() {
         //$("html").scrollTop(1);
         setTimeout(function() { 
             window.scrollTo(0, 1); 
-            $("#gamebox").css("top", winheight-76);}, 3);
+            $("#gamebox").css("top", winheight-90);}, 3);
         $("body").bind('touchmove',function(e){ e.stopPropagation();e.preventDefault(); });
-        $("#gamebox").css("top", winheight-76);
+        $("#gamebox").css("top", winheight-90);
         
     }
     else { //start rain
@@ -509,18 +515,14 @@ $(document).ready(function() {
         _gaq.push(['_trackEvent', 'Topic', topicid, 'show']);
 		if (seltopic == null) {
 			curArea.animate({"height": height},slidetime);
-			contents.animate({"height": height-46},slidetime, function() {
-                if (topicid == "portfolio") myScroll = new iScroll(contents);
-            });
+			contents.animate({"height": height-46},slidetime, function(){mobiscroll(contents)});
 			seltopic = curArea;
 		} else {
 			seltopic.animate({"height": 26},slidetime);
 			seltopic.next({"height": 0},slidetime);
 			if (seltopic.attr("id") != curArea.attr("id")) {
 				curArea.animate({"height": height},slidetime);
-				contents.animate({"height": height-46},slidetime, function() {
-                    if (topicid == "portfolio") myScroll = new iScroll(contents);
-                });
+				contents.animate({"height": height-46},slidetime, function(){mobiscroll(contents)});
 				seltopic = curArea;
 			}
 			else {

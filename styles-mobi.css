@@ -9,10 +9,23 @@
     right:6px;
     width:140px;
     height:70px;
+    line-height: 0.8em;
 }
-
+#gamebox p {
+	font-size:11px;
+}
+#gamebox b {
+font-family: 'Electrolize', sans-serif;
+font-size:14px;
+}
+p#gametitle {
+	font-size:15px;
+	font-weight:bold;
+	margin: 0;
+	font-style:italic;
+}
 #topics {
-    margin:10px;
+    margin:8px;
 }
 div.topicbox {
     opacity:1;
