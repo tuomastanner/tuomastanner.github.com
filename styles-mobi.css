@@ -1,0 +1,16 @@
+#wreport {
+    display: none;
+}
+#gameoverbox {
+    top:10px;
+    left:10px;
+}
+#gamebox {
+    bottom:6px;
+    width:80px;
+    height:auto;
+}
+#topics {
+    margin:10px;
+    opacity: 1;
+}

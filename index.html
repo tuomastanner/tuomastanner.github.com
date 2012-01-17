@@ -3,14 +3,16 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Tuomas Tanner - web application programmer and javascript enthusiast</title>
-<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" />
 <meta name="description" content="Tuomas Tanner is the lead software developer at TypingMaster.com. Come over and play the fun fishing game and have a look at some nice photos.">
 <meta property="og:description" content="Tuomas Tanner is the lead software developer at TypingMaster.com. Come over and play the fun fishing game and have a look at some nice photos." >
 <meta property="og:image" content="http://tuomastanner.github.com/tuomas.jpg">
+<link rel="shortcut icon" href="weather-sun.png" />
 
 <link href='http://fonts.googleapis.com/css?family=Electrolize' rel='stylesheet' type='text/css'>
-<link href="styles.css" rel="stylesheet" type="text/css">
-<link rel="shortcut icon" href="weather-sun.png" />
+<link rel="stylesheet" media="all" type="text/css" href="styles.css">
+<link rel="stylesheet" media="only screen and (max-width: 500px)" type="text/css" href="styles-mobi.css">
+<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no,initial-scale=1.0, minimum-scale=1.0">
+
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="animt.js"></script>
 <script type="text/javascript">
@@ -340,11 +342,11 @@ function scalephoto(photo) {
     var photoheight = photo.height();
     var hscale = 1;
     var vscale = 1;
-    if (photowidth > winwidth-100) {
-        hscale = (winwidth-100)/photowidth;
+    if (photowidth > winwidth*0.92) {
+        hscale = (winwidth*0.92)/photowidth;
     }
-    if (photoheight > winheight-40) {
-        vscale = (winheight-40)/photoheight;
+    if (photoheight > winheight*0.92) {
+        vscale = (winheight*0.92)/photoheight;
     }
 	if (vscale < 1 || hscale < 1) {
 		if (vscale < hscale) hscale = vscale;
@@ -419,8 +421,6 @@ $(document).ready(function() {
 	abg = getEl("abg");
 	fbg = getEl("bg");
 	aniMt.start();
-	randomDrop();
-	aniMt.addTimer("rain", "randomDrop()", 400);
 	aniMt.addTimer("ripples", "ripple()", 150);	
 	//pause all animation & game on change of window or tab
 	$(window).blur(function(){aniMt.stop()}).focus(function(){if (!animpaused)aniMt.start()});
@@ -434,6 +434,16 @@ $(document).ready(function() {
 		winwidth = $(window).width();
 	});
 	
+    //set mobile layout
+    if (winwidth <= 500) {
+        
+        $("html").scrollTop(1); //hide address bar
+    }
+    else { //start rain
+        randomDrop();
+        aniMt.addTimer("rain", "randomDrop()", 400);
+    }
+    
 	//mouse splashes
 	$("#bg").css("height",winheight)
 		.click(function(e) {
@@ -538,7 +548,6 @@ $(document).ready(function() {
 
 </script>
 <script type="text/javascript">
-
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-28259376-1']);
   _gaq.push(['_trackPageview']);
@@ -548,7 +557,6 @@ $(document).ready(function() {
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-
 </script>
 </head>
 <body> 
