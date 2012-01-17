@@ -434,10 +434,14 @@ $(document).ready(function() {
 		winwidth = $(window).width();
 	});
 	
+    var twwidth = winwidth-300;
     //set mobile layout
     if (winwidth <= 500) {
-        
-        $("html").scrollTop(1); //hide address bar
+        twwidth = winwidth-50;
+        //hide address bar
+        //$("html").scrollTop(1);
+        setTimeout(function() { window.scrollTo(0, 1); }, 1);
+        $("body").bind('touchmove',function(e){ e.stopPropagation();e.preventDefault(); });
     }
     else { //start rain
         randomDrop();
@@ -522,7 +526,7 @@ $(document).ready(function() {
 			type: 'profile',
 			rpp: 5,
 			interval: 30000,
-			width: (winwidth-300),
+			width: (twwidth),
 			height: 300,
 			theme: {
 			shell: {
