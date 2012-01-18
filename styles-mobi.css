@@ -3,33 +3,43 @@
 }
 #gameoverbox {
     top:10px;
-    left:10px;
+    left:2%;
+    width:96%;
 }
 #gamebox {
-    right:6px;
-    width:140px;
-    height:70px;
+    position:static;
+    margin:6px;
+    width:auto;
     line-height: 0.8em;
+    opacity:1;
+    height:auto;
 }
 #gamebox p {
 	font-size:11px;
+    margin:0px;
+    display: inline;
 }
 #gamebox b {
 font-family: 'Electrolize', sans-serif;
 font-size:14px;
+font-weight: bold;
 }
 p#gametitle {
 	font-size:15px;
 	font-weight:bold;
 	margin: 0;
+    padding-right: 10px;
 	font-style:italic;
 }
 #topics {
-    margin:8px;
+    margin:6px;
 }
 div.topicbox {
     opacity:1;
 }
 .topiccont {
     overflow-y: scroll;
+}
+#abouttext {
+    margin-left:6px;
 }

@@ -228,9 +228,10 @@ font-weight:bold;
 	top: 16px;
 	right:16px;
 	text-align:center;
-user-select: none;
--webkit-user-select: none;
--moz-user-select: none;
+    
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 #gamebox p {
 	font-size:12px;
@@ -316,6 +317,9 @@ h1.topic {
 	position:relative;
 	overflow-x:hidden;
 	overflow-y:auto;
+}
+#abouttext {
+    margin-left:130px;
 }
 .topborder {
 	padding-top:8px;
