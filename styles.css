@@ -196,6 +196,7 @@ div.bluebg {
 	position: absolute;
 	top: 116px;
 	right: 16px;
+	padding-bottom: 11px;
 }
 #wreport div {
 	font-size: 10px;
